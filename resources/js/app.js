@@ -3,16 +3,19 @@ require('./bootstrap');
 window.Vue = require('vue');
 
 import VueRouter from 'vue-router';
-Vue.use(VueRouter);
+import {Form, HasError, AlertError} from 'vform';
 import {routes} from "./routes";
+
+window.Form = Form;
+Vue.component(HasError.name, HasError);
+Vue.component(AlertError.name, AlertError);
+
+Vue.use(VueRouter);
 
 const router = new VueRouter({
     mode:'history',
     routes
 });
-
-Vue.component('example-component', require('./components/ExampleComponent.vue').default);
-
 
 const app = new Vue({
     el: '#app',
