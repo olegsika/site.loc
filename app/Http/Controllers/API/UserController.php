@@ -60,9 +60,13 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UserRequest $request, $id)
     {
         //
+        $request['password'] = Hash::make($request['password']);
+        User::findOrFail($id)->update($request->all());
+
+        return ['message' => $id];
     }
 
     /**

@@ -23,11 +23,34 @@ class UserRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'name' => 'required|string|max:191',
-            'email' => 'required|string|email|max:191|unique:users',
-            'password' => 'required|string|min:8',
-            'type' => 'required|string'
-        ];
+
+        switch($this->method())
+        {
+            case 'GET':
+            case 'DELETE':
+                {
+                    return [];
+                }
+            case 'POST':
+                {
+                    return [
+                        'name'      => 'required|string|max:191',
+                        'email'     => 'required|string|email|max:191|unique:users',
+                        'password'  => 'required|string|min:8',
+                        'type'      => 'required|string'
+                    ];
+                }
+            case 'PUT':
+            case 'PATCH':
+                {
+                    return [
+                        'name'      => 'required|string|max:191',
+                        'email'     => 'required|string|email|max:191|unique:users,id,?????',
+                        'password'  => 'sometimes|string|min:8',
+                        'type'      => 'required|string'
+                    ];
+                }
+            default:break;
+        }
     }
 }

@@ -6,7 +6,7 @@
                     <h3 class="card-title">Users Table</h3>
 
                     <div class="card-tools">
-                        <button class="btn btn-success" data-toggle="modal" data-target="#addNew">Add New <i class="fas fa-user-plus fa-fw"></i> </button>
+                        <button class="btn btn-success" @click="newModal">Add New <i class="fas fa-user-plus fa-fw"></i> </button>
                     </div>
                 </div>
                 <!-- /.card-header -->
@@ -27,7 +27,7 @@
                             <th>{{ user.type | upText}}</th>
                             <th>{{ user.created_at | myDate}}</th>
                             <td>
-                                <a href="#">
+                                <a href="#" @click="editModal(user)">
                                     <i class="fas fa-edit blue"></i>
                                 </a>
                                 /
@@ -48,12 +48,13 @@
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addNewLabel">Add New</h5>
+                        <h5 v-show="editMode" class="modal-title" id="addNewLabel">Update User`s info</h5>
+                        <h5 v-show="!editMode"class="modal-title" id="addNewLabel">Add New</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form @submit.prevent="createUser">
+                    <form @submit.prevent="editMode ? updateUser() : createUser()">
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Name</label>
@@ -91,7 +92,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Create</button>
+                        <button v-show="editMode" type="submit" class="btn btn-success">Update</button>
+                        <button v-show="!editMode" type="submit" class="btn btn-primary">Create</button>
                     </div>
                     </form>
                 </div>
@@ -105,10 +107,12 @@
     export default {
         data() {
             return {
+                editMode: false,
                 users: {
 
                 },
                 form: new Form({
+                    id: '',
                     name: '',
                     email: '',
                     password: '',
@@ -119,6 +123,34 @@
             }
         },
         methods: {
+            updateUser(){
+                this.$Progress.start();
+                this.form.put('api/user/' +this.form.id)
+                    .then(() => {
+                        Fire.$emit('Update');
+                        $('#addNew').modal('hide');
+                        toast({
+                            type: 'success',
+                            title: 'User updated successfully'
+                        });
+                        this.$Progress.finish();
+                    })
+                    .catch(() => {
+                        this.$Progress.fail();
+                    });
+            },
+            newModal(){
+                this.editMode = false;
+                this.form.reset();
+                $('#addNew').modal('show');
+            },
+            editModal(user){
+                this.editMode = true;
+                this.form.clear();
+                this.form.reset();
+                $('#addNew').modal('show');
+                this.form.fill(user);
+            },
             deleteUser(id){
                 Swal({
                     title: 'Are you sure?',
@@ -155,8 +187,7 @@
                         toast({
                             type: 'success',
                             title: 'User created successfully'
-                        })
-                        this.form.reset();
+                        });
                         this.$Progress.finish();
                     })
                     .catch(() => {
