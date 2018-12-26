@@ -24,15 +24,15 @@
                             <td>{{ user.id }}</td>
                             <td>{{ user.name }}</td>
                             <td>{{ user.email }}</td>
-                            <th>{{ user.type }}</th>
-                            <th>{{ user.created_at }}</th>
+                            <th>{{ user.type | upText}}</th>
+                            <th>{{ user.created_at | myDate}}</th>
                             <td>
                                 <a href="#">
                                     <i class="fas fa-edit blue"></i>
                                 </a>
                                 /
-                                <a href="#">
-                                    <i class="fas fa-trash red"></i>
+                                <a href="#" @click="deleteUser(user.id)">
+                                    <i class="fa fa-trash red"></i>
                                 </a>
                             </td>
                         </tr>
@@ -119,15 +119,56 @@
             }
         },
         methods: {
+            deleteUser(id){
+                Swal({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if(result.value) {
+                        this.form.delete('api/user/' + id).then(() => {
+                            Swal(
+                                'Deleted!',
+                                'Your file has been deleted.',
+                                'success'
+                            )
+                            Fire.$emit('Update');
+                        }).catch(() => {
+                            Swal("Filed!", "There was something wrond.", "warning")
+                        });
+                    }
+                })
+            },
             loadUsers() {
                 axios.get("api/user").then(({data}) => (this.users = data.data))
             },
             createUser() {
-                this.form.post('api/user');
+                this.$Progress.start();
+                this.form.post('api/user')
+                    .then(() => {
+                        Fire.$emit('Update');
+                        $('#addNew').modal('hide');
+                        toast({
+                            type: 'success',
+                            title: 'User created successfully'
+                        })
+                        this.form.reset();
+                        this.$Progress.finish();
+                    })
+                    .catch(() => {
+                        this.$Progress.fail();
+                    });
             }
         },
         created() {
             this.loadUsers();
+            Fire.$on('Update', () => {
+                this.loadUsers();
+            });
         }
     }
 </script>
