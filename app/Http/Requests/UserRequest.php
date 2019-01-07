@@ -24,6 +24,7 @@ class UserRequest extends FormRequest
     public function rules()
     {
 
+
         switch($this->method())
         {
             case 'GET':
@@ -46,7 +47,7 @@ class UserRequest extends FormRequest
                     return [
                         'name'      => 'required|string|max:191',
                         'email'     => 'required|string|email|max:191|unique:users,id,?????',
-                        'password'  => 'sometimes|string|min:8',
+                        'password'  => 'sometimes|required|string|min:8',
                         'type'      => 'required|string'
                     ];
                 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserRequest;
 
@@ -15,6 +16,11 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct()
+    {
+        return $this->middleware('auth:api');
+    }
+
     public function index()
     {
         //
@@ -25,21 +31,13 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  UserRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(UserRequest $request)
     {
 
-        return User::create([
-            'name'      => $request['name'],
-            'email'     => $request['email'],
-            'type'      => $request['type'],
-            'bio'       => $request['bio'],
-            'photo'     => $request['photo'],
-            'password'  => Hash::make($request['password']),
-            ''
-        ]);
+        return User::create($request->all());
     }
 
     /**
@@ -54,6 +52,40 @@ class UserController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function profile()
+    {
+        return auth('api')->user();
+    }
+
+    public function updateProfile(UserRequest $request)
+    {
+        $user = auth('api')->user();
+
+        $currentPhoto = $user->photo;
+
+        if($request->photo != $currentPhoto){
+            $name = time().'.'. explode('/', explode(':', substr($request->photo, 0, strpos($request->photo, ';')))[1])[1];
+            \Image::make($request->photo)->save(public_path('img/profile/').$name);
+            $request->merge(['photo' => $name]);
+
+            $userPhoto = public_path('img/profile/').$currentPhoto;
+            if(file_exists($userPhoto)){
+                @unlink($userPhoto);
+            }
+        }
+
+        $user->update($request->all());
+
+        return ['message' => 'Success'];
+    }
+
+
+    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -62,8 +94,6 @@ class UserController extends Controller
      */
     public function update(UserRequest $request, $id)
     {
-        //
-        $request['password'] = Hash::make($request['password']);
         User::findOrFail($id)->update($request->all());
 
         return ['message' => $id];
@@ -77,7 +107,6 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
         User::findOrFail($id)->delete();
 
         return ['message' => 'User Deleted'];
