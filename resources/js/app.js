@@ -8,6 +8,8 @@ import VueProgressBar from 'vue-progressbar';
 import {swal} from "./sweetalert";
 import {routes} from "./routes";
 import {filters} from "./filters";
+import Gate from "./Gate.js";
+Vue.prototype.$gate = new Gate(window.user);
 
 window.Form = Form;
 Vue.component(HasError.name, HasError);
@@ -40,6 +42,11 @@ Vue.component(
 Vue.component(
     'passport-personal-access-tokens',
     require('./components/passport/PersonalAccessTokens.vue').default
+);
+
+Vue.component(
+    'not-found',
+    require('./components/NotFound.vue').default
 );
 
 const app = new Vue({

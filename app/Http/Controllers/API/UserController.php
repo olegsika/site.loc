@@ -6,7 +6,6 @@ use App\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\UserRequest;
 
 class UserController extends Controller
@@ -24,7 +23,7 @@ class UserController extends Controller
     public function index()
     {
         //
-
+        $this->authorize('isAdmin');
         return User::latest()->paginate(10);
     }
 
@@ -107,6 +106,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('isAdmin');
         User::findOrFail($id)->delete();
 
         return ['message' => 'User Deleted'];
