@@ -15,6 +15,8 @@ window.Form = Form;
 Vue.component(HasError.name, HasError);
 Vue.component(AlertError.name, AlertError);
 
+Vue.component('pagination', require('laravel-vue-pagination'));
+
 Vue.use(VueRouter);
 
 Vue.use(VueProgressBar, {
@@ -51,5 +53,13 @@ Vue.component(
 
 const app = new Vue({
     el: '#app',
-    router
+    router,
+    data: {
+        search: ''
+    },
+    methods: {
+        searchhit: _.debounce(() => {
+            Fire.$emit('searching');
+        }, 1000)
+    }
 });
